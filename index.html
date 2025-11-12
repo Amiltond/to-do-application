@@ -6,12 +6,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>coisas pra fazer</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=2">
 </head>
 <body>
-    <div class="div-container">
+    <div class="container">
         <div class="todo-app">
             <h1>AS COISA QUE TU TEM PRA FAZER:</h1>
+            <div class="stat-container">
+                <div class="details">
+                    <h3>Quase Lá!</h3>
+                    <div id="progressbar">
+                        <div id="progress"></div>
+                    </div>
+                </div>   
+                <div class="stats-number">
+                    <p id="numbers">0 / 0</p>
+                </div>
+            </div>
             <form class="input-area">
                 <input type="text" id="task-input" placeholder="lavar a louça, estudar, etc...">
                 <button type="submit" id="add-task-btn"><i class="fa-solid fa-plus"></i></button>
@@ -19,7 +30,7 @@
             </form>
             <div class="todos-container">
                 <ul id="task-list"></ul>
-                <img class="empty-image" src="/images/no-to-dos.png" alt="empty-image">
+                <img class="empty-image" src="images/no-to-dos.png" alt="empty-image">
         </div>
     </div>
 </body>

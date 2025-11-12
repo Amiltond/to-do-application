@@ -48,6 +48,55 @@ body{
     backdrop-filter:blur(10px);
 }
 
+.stat-container{
+    padding: 15px 20px;
+    border-radius: 10px;
+    border: 3px solid rgba(124, 147, 157, 0.153);
+    display:flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    width: 100%;
+}
+
+.datails{
+    width: 100%;
+}
+
+.datils h3{
+    color: #ffffff;
+}
+
+#progressbar{
+    width: 100%;
+    height: 7px;
+    background: rgba(102, 102, 134, 0.474);
+    border-radius: 20px;
+    position:relative;
+    margin-top: 15px;
+}
+
+#progress{
+    width: 0%;
+    height: 100%;
+    background:#30839f;
+    border-radius:20px;
+    transition: width 0,3s ease;
+}
+
+#numbers{
+    display: flex;
+    align-items: center;
+    justify-content:center;
+    width: 80px;
+    height: 80px;
+    background: #fcfcfc37;
+    border: 2px solid rgba(0, 0, 0, 0.18);
+    font-weight:bold;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    
+}
 /*to-do app*/
 .input-area{
     
@@ -99,6 +148,7 @@ body{
 }
 
 .todos-container{
+    /* width:100%; */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -146,6 +196,11 @@ body{
     word-wrap: break-word;
 }
 
+#task-list li.complted span{
+    text-decoration: 2px line-through #000;
+    color: #000;
+}
+
 .empty-image{
     width: 100px;
     height: 100px;
@@ -175,6 +230,12 @@ body{
     transform: scale(1.2);
 }
 
-.task-buttons .edit-btn{
+.task-buttons button.edit-btn{
     background: #ffbf00;
 }
+
+.task-buttons button.delete-btn{
+    background: red;
+}
+
+
