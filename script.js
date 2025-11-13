@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const progressNumbers = document.getElementById('numbers');
     const progress = document.getElementById('progress');
     let confettiFired = false;   
+    const date = document.getElementById('data')
 
     const toggleEmptyState = () => {
         const hasTasks = taskList.children.length > 0;
@@ -66,7 +67,9 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="task-buttons">
             <button class="edit-btn"><i class="fa-solid fa-pen"></i></button>
             <button class="delete-btn"><i class="fa-solid fa-trash"></i></button>
-        </div>`;
+        </div>
+        <span>${data}</span>
+        `;
 
         const checkbox = li.querySelector('.checkbox');
         const editBtn = li.querySelector('.edit-btn');

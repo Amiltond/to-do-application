@@ -32,7 +32,7 @@ body{
 
 .todo-app{
     width: 100%;
-    max-width: 400px;
+    max-width: 450px;
     padding: 2rem;
     display: flex;
     align-items: center;
@@ -98,7 +98,6 @@ body{
 }
 
 .input-area{
-    
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -108,7 +107,7 @@ body{
 
 /*escrever as tasks*/
 .input-area input{
-    flex: 1;
+    width: 100%;
     height: 50px;
     left:15px;
     position:center;
@@ -137,6 +136,8 @@ body{
     border: 2px solid rgba(100, 188, 243, 0.474);
     cursor: pointer;
     transition: all 0.2s ease;
+    height: 100px;
+    width: 50px;
 }
 
 .input-area button:hover{
@@ -175,7 +176,7 @@ body{
 }
 
 #task-list li.completed{
-    background: #ff6f91;
+    background: #76e6c054;
     transform: scale(1.1);
 }
 
@@ -237,6 +238,11 @@ body{
     background: red;
 }
 
+.datamax{
+    height: 10px;
+    width: 10px;
+}
+
 #tsparticles {
     position: fixed; /* Fica por cima de tudo */
     top: 0;
@@ -282,3 +288,5 @@ body{
 .sortable-drag {
     opacity: 0.9 !important;
 }
+
+
