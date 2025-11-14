@@ -24,9 +24,12 @@
                 </div>
             </div>
             <form class="input-area">
-                <div class="inputs-wrapper">
+                <div class="input-fields-wrapper">
                     <input type="text" id="task-input" placeholder="lavar a louça, estudar, etc..."> 
-                    <input type="date" id="data">     
+                    <div class="date-input-wrapper">
+                        <input type="text" id="data" placeholder="dd/mm" maxlength="5">
+                        <i class="fa-solid fa-calendar-days"></i>
+                    </div>    
                 </div>
                 <button type="submit" id="add-task-btn"><i class="fa-solid fa-plus"></i></button>
 

@@ -1,4 +1,3 @@
-
 document.addEventListener('DOMContentLoaded', () => {
     const taskInput = document.getElementById('task-input');
     const addTaskBtn = document.getElementById('add-task-btn');
@@ -7,11 +6,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const todosContainer = document.querySelector('.todos-container');
     const progressNumbers = document.getElementById('numbers');
     const progress = document.getElementById('progress');
-    let confettiFired = false;   
-    const date = document.getElementById('data')
+    let confettiFired = false;    
+    const date = document.getElementById('data');
+    const H3 = document.querySelector("h3");
+    const statContainer = document.querySelector('.stat-container');
+    let isEditing = false;
+    let currentEditLi = null;
+
+    date.addEventListener('input', (e) => {
+        if (e.target.value.length === 2 && e.inputType !== 'deleteContentBackward') {
+            e.target.value += '/';
+        }
+    });
 
     const toggleEmptyState = () => {
         const hasTasks = taskList.children.length > 0;
+        statContainer.style.display = hasTasks ? 'flex' : 'none';
         emptyImage.style.display = hasTasks ? 'none' : 'block';
         todosContainer.style.width = hasTasks ? '100%' : '50%';
         if (hasTasks) {
@@ -36,40 +46,57 @@ document.addEventListener('DOMContentLoaded', () => {
             confettiFired = true;
         }else if (!allTasksDone){
             confettiFired = false;
+        };
+        if (allTasksDone) {
+            H3.textContent = "Parabéns!";
+        } else {
+            H3.textContent = "Quase lá!";
         }
     };
-    
 
+    // Esta função salva o texto, a data e o estado 'completed'
     const saveTaskToLocalStorage = () =>{
-        const tasks = Array.from(taskList.querySelectorAll('li')).map(li => ({
-            text: li.querySelector('span').textContent,completed: li.querySelector('.checkbox').checked
+        const tasksToSave = Array.from(taskList.querySelectorAll('li')).map(li => ({
+            text: li.querySelector('span:first-of-type').textContent,
+            date: li.querySelector('span.datedate').textContent, // Salva a data
+            completed: li.querySelector('.checkbox').checked
         }));
-
-        localStorage.setItem('tasks', JSON.stringify(tasks));
+        localStorage.setItem('tasks', JSON.stringify(tasksToSave));
     };
 
+    // Esta função carrega o texto, a data e o estado 'completed'
     const loadTasksFromLocalStorage = () => {
         const savedTasks = JSON.parse(localStorage.getItem('tasks')) || [];
-        savedTasks.forEach(({text, completed}) => addTask(text,completed, false));
+        savedTasks.forEach(({text, date, completed}) => addTask(text, date, completed, false));
         toggleEmptyState();
         updateProgress();
     };
 
-    const addTask = (text, completed = false, checkCompletion = true) => {
-        const taskText = text || taskInput.value.trim();
-        if(!taskText){
+    // A função 'addTask' aceita a data vinda do localStorage
+    const addTask = (text, dateValue = null, completed = false, checkCompletion = true) => {
+        if (isEditing){
             return;
         }
+        
+        const taskText = text || taskInput.value.trim();
+        const taskDate = dateValue !== null ? dateValue : date.value.trim(); 
+
+        if(!taskText){
+            return;
+        };
 
         const li = document.createElement('li');
         li.innerHTML =  `
-        <input type="checkbox" class="checkbox" ${completed ? 'checked' : ''} /><span>${taskText}</span>
+        <input type="checkbox" class="checkbox" ${completed ? 'checked' : ''} />
+        <span>${taskText}</span>
+        
         <div class="task-buttons">
-            <button class="edit-btn"><i class="fa-solid fa-pen"></i></button>
-            <button class="delete-btn"><i class="fa-solid fa-trash"></i></button>
-        </div>
-        <span>${data}</span>
-        `;
+            <span class="datedate">${taskDate}</span> 
+            <div class="buttons-wrapper"> 
+                <button class="edit-btn"><i class="fa-solid fa-pen"></i></button>
+                <button class="delete-btn"><i class="fa-solid fa-trash"></i></button>
+            </div>
+        </div>`;
 
         const checkbox = li.querySelector('.checkbox');
         const editBtn = li.querySelector('.edit-btn');
@@ -93,11 +120,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
         editBtn.addEventListener('click', () => {
             if(!checkbox.checked) {
-                taskInput.value = li.querySelector('span').textContent;
-                li.remove();
-                toggleEmptyState();
+                currentEditLi = li; 
+                taskInput.value = li.querySelector('span:first-of-type').textContent;
+                date.value = li.querySelector('.datedate').textContent; 
+                
+                li.remove(); 
+                
+                isEditing = true;
+                
+                addTaskBtn.innerHTML = '<i class="fa-solid fa-check"></i>';
+                addTaskBtn.style.backgroundColor = '#52b69a'; 
+                addTaskBtn.classList.add('editing-mode'); 
+                
+                taskInput.style.backgroundColor = '#ffbf00'; 
+                date.style.backgroundColor = '#ffbf00'; 
+                
+                taskInput.focus();
+                
+                // ▼▼ CORREÇÃO DO BUG "IMAGEM VAZIA" ▼▼
+                // toggleEmptyState(); // Esta linha foi desativada!
+                // ▲▲ FIM DA CORREÇÃO ▲▲
+                
+                // Desativa as outras tarefas
+                taskList.querySelectorAll('li').forEach(item => {
+                    item.style.pointerEvents = 'none';
+                    item.style.opacity = '0.5';
+                });
+                
                 updateProgress(false);
-                saveTaskToLocalStorage();
+                saveTaskToLocalStorage(); 
             }
         })
 
@@ -108,8 +159,20 @@ document.addEventListener('DOMContentLoaded', () => {
             saveTaskToLocalStorage();
         })
 
-        taskList.appendChild(li);
-        taskInput.value = '';
+        if (checkCompletion) {
+            taskList.prepend(li);
+        } else {
+            taskList.appendChild(li);
+        }
+        
+        if (checkCompletion) { 
+            taskInput.value = '';
+            date.value = ''; 
+        }
+        
+        taskInput.style.backgroundColor = '';
+        date.style.backgroundColor = '';
+        
         toggleEmptyState();
         updateProgress(checkCompletion);
         saveTaskToLocalStorage();
@@ -117,20 +180,66 @@ document.addEventListener('DOMContentLoaded', () => {
 
     addTaskBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        addTask();
-    })
+        
+        if (isEditing) {
+            if (currentEditLi) {
+                currentEditLi.querySelector('span:first-of-type').textContent = taskInput.value.trim();
+                currentEditLi.querySelector('.datedate').textContent = date.value.trim(); 
+                
+                taskList.prepend(currentEditLi);
+
+                currentEditLi.style.backgroundColor = ''; 
+                currentEditLi.classList.remove('editing'); 
+            }
+            isEditing = false;
+            currentEditLi = null;
+
+            addTaskBtn.innerHTML = '<i class="fa-solid fa-plus"></i>';
+            addTaskBtn.style.backgroundColor = ''; 
+            addTaskBtn.classList.remove('editing-mode'); 
+
+            // Reativa as outras tarefas
+            taskList.querySelectorAll('li').forEach(item => {
+                item.style.pointerEvents = 'auto';
+                item.style.opacity = '1';
+            });
+
+        } else {
+            addTask(null, null, false, true); 
+        }
+
+        taskInput.value = '';
+        taskInput.style.backgroundColor = '';
+        date.value = ''; 
+        date.style.backgroundColor = '';
+        addTaskBtn.blur();
+        saveTaskToLocalStorage(); 
+        toggleEmptyState(); 
+        updateProgress();
+    });
+
     taskInput.addEventListener('keypress', (e) => {
         if(e.key === 'Enter'){
             e.preventDefault();
-            addTask();
+            addTaskBtn.click(); 
+            taskInput.blur();
+        }
+    });
+
+    date.addEventListener('keypress', (e) => {
+        if(e.key === 'Enter'){
+            e.preventDefault();
+            addTaskBtn.click();
+            date.blur();
         }
     });
 
     Sortable.create(taskList, {
         animation: 150,
         ghostClass: 'sortable-ghost',
+        forceFallback: true,
         onEnd: function () {
-        saveTaskToLocalStorage();
+            saveTaskToLocalStorage();
         }
     });
 
@@ -144,5 +253,5 @@ const confettiLaunch = () => {
         spread: 100,
         origin: { y: 0.9 },
         colors: ["#219ebc","#52b69a","#d9ed92", "#61a5c2"]
-      });
+    });
 };
