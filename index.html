@@ -24,15 +24,20 @@
                 </div>
             </div>
             <form class="input-area">
-                <div class="input-fields-wrapper">
-                    <input type="text" id="task-input" placeholder="lavar a louça, estudar, etc..."> 
-                    <div class="date-input-wrapper">
-                        <input type="text" id="data" placeholder="dd/mm" maxlength="5">
+                <div class="inputs-column">
+                    
+                    <input type="text" id="task-input" placeholder="estudar, correr, etc...">
+                    
+                    <div class="date-wrapper">
+                        <input type="text" id="data" placeholder="dd/mm">
                         <i class="fa-solid fa-calendar-days"></i>
-                    </div>    
+                    </div>
+            
                 </div>
-                <button type="submit" id="add-task-btn"><i class="fa-solid fa-plus"></i></button>
-
+            
+                <button type="submit" id="add-task-btn">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
             </form>
             <div class="todos-container">
                 <ul id="task-list"></ul>

@@ -195,8 +195,8 @@ document.addEventListener('DOMContentLoaded', () => {
             currentEditLi = null;
 
             addTaskBtn.innerHTML = '<i class="fa-solid fa-plus"></i>';
-            addTaskBtn.style.backgroundColor = ''; 
-            addTaskBtn.classList.remove('editing-mode'); 
+            addTaskBtn.removeAttribute("style");   // ← remove TODOS os estilos inline
+            addTaskBtn.classList.remove('editing-mode');
 
             // Reativa as outras tarefas
             taskList.querySelectorAll('li').forEach(item => {
@@ -237,7 +237,12 @@ document.addEventListener('DOMContentLoaded', () => {
     Sortable.create(taskList, {
         animation: 150,
         ghostClass: 'sortable-ghost',
+        dragClass:'sortable-drag',
         forceFallback: true,
+        fallbackOnBody: true,
+        fallbackTolerance: 2,
+        filter: '.checkbox, edit-btn, delete-btn, input',
+        preventOnFilter: false, 
         onEnd: function () {
             saveTaskToLocalStorage();
         }
@@ -255,3 +260,5 @@ const confettiLaunch = () => {
         colors: ["#219ebc","#52b69a","#d9ed92", "#61a5c2"]
     });
 };
+
+fa-solid
