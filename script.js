@@ -12,6 +12,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const statContainer = document.querySelector('.stat-container');
     let isEditing = false;
     let currentEditLi = null;
+    const somConcluido = new Audio ('./sounds/concluded.mp3')
+    somConcluido.volume = 0.03;
+    const somAdicionar = new Audio ('./sounds/addtask.mp3');
+    somAdicionar.volume = 0.1;
+    const somApagar = new Audio ('./sounds/deletetask.mp3');
+    somApagar.volume = 0.1;
+    const somEditar = new Audio ('./sounds/deletetask2.mp3')
+    somEditar.volume = 0.1;
 
     date.addEventListener('input', (e) => {
         if (e.target.value.length === 2 && e.inputType !== 'deleteContentBackward') {
@@ -43,9 +51,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if(checkCompletion && allTasksDone && !confettiFired) {
             confettiLaunch();
+            somConcluido.currentTime = 0;
+            somConcluido.play();
             confettiFired = true;
         }else if (!allTasksDone){
             confettiFired = false;
+            somConcluido.pause();
+            somConcluido.currentTime = 0;
         };
         if (allTasksDone) {
             H3.textContent = "Parabéns!";
@@ -72,12 +84,10 @@ document.addEventListener('DOMContentLoaded', () => {
         updateProgress();
     };
 
-    // A função 'addTask' aceita a data vinda do localStorage
     const addTask = (text, dateValue = null, completed = false, checkCompletion = true) => {
         if (isEditing){
             return;
         }
-        
         const taskText = text || taskInput.value.trim();
         const taskDate = dateValue !== null ? dateValue : date.value.trim(); 
 
@@ -137,11 +147,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 taskInput.focus();
                 
-                // ▼▼ CORREÇÃO DO BUG "IMAGEM VAZIA" ▼▼
-                // toggleEmptyState(); // Esta linha foi desativada!
-                // ▲▲ FIM DA CORREÇÃO ▲▲
-                
-                // Desativa as outras tarefas
                 taskList.querySelectorAll('li').forEach(item => {
                     item.style.pointerEvents = 'none';
                     item.style.opacity = '0.5';
@@ -153,6 +158,10 @@ document.addEventListener('DOMContentLoaded', () => {
         })
 
         li.querySelector('.delete-btn').addEventListener('click', () => {
+
+            somApagar.currentTime = 0;
+            somApagar.play();
+
             li.remove();
             toggleEmptyState();
             updateProgress();
@@ -168,6 +177,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (checkCompletion) { 
             taskInput.value = '';
             date.value = ''; 
+
+            somAdicionar.currentTime = 0;
+            somAdicionar.play().catch(e => console.log("Erro no som:", e));
         }
         
         taskInput.style.backgroundColor = '';
@@ -182,20 +194,30 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         
         if (isEditing) {
+            // --- LÓGICA DE EDIÇÃO ---
             if (currentEditLi) {
+                // Atualiza os textos
                 currentEditLi.querySelector('span:first-of-type').textContent = taskInput.value.trim();
                 currentEditLi.querySelector('.datedate').textContent = date.value.trim(); 
                 
+                // Move a tarefa editada para o topo
                 taskList.prepend(currentEditLi);
 
                 currentEditLi.style.backgroundColor = ''; 
                 currentEditLi.classList.remove('editing'); 
+
+                // TOCA O SOM DE EDIÇÃO
+                somEditar.currentTime = 0;
+                somEditar.play().catch(e => console.log(e));
             }
+            
+            // Reseta variáveis
             isEditing = false;
             currentEditLi = null;
 
+            // Volta o botão ao normal
             addTaskBtn.innerHTML = '<i class="fa-solid fa-plus"></i>';
-            addTaskBtn.removeAttribute("style");   // ← remove TODOS os estilos inline
+            addTaskBtn.removeAttribute("style");
             addTaskBtn.classList.remove('editing-mode');
 
             // Reativa as outras tarefas
@@ -205,9 +227,11 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
         } else {
+            // --- LÓGICA DE NOVA TAREFA ---
             addTask(null, null, false, true); 
         }
 
+        // Limpeza final (comum para os dois casos)
         taskInput.value = '';
         taskInput.style.backgroundColor = '';
         date.value = ''; 
@@ -261,4 +285,3 @@ const confettiLaunch = () => {
     });
 };
 
-fa-solid
