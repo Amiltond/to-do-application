@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const li = document.createElement('li');
         li.innerHTML =  `
-        <input type="checkbox" class="checkbox" ${completed ? 'checked' : ''} />
+        <input type="checkbox" class="checkbox" id="checkbox"${completed ? 'checked' : ''} />
         <span>${taskText}</span>
         
         <div class="task-buttons">
