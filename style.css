@@ -377,3 +377,35 @@ body{
     z-index: 5;
 }
 
+/* Estilo para o checkbox não marcado (opcional, para garantir a consistência) */
+.checkbox {
+    /* Defina um tamanho para tornar a caixa visível e uniforme */
+    -webkit-appearance: none; /* Oculta a aparência padrão do Chrome/Safari */
+    -moz-appearance: none;    /* Oculta a aparência padrão do Firefox */
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 5px;
+    border: 2px solid #073b4c;
+    cursor: pointer;
+    background-color: transparent;
+    transition: background-color 0.2s;
+}
+
+/* Estilo para o checkbox QUANDO MARCADO */
+.checkbox:checked {
+    background-color: #54a58a; /* Cor de fundo quando marcado */
+    border-color: #54a58a;
+}
+
+/* Opcional: Adicionar um ícone de marca de verificação */
+.checkbox:checked::before {
+    content: '\f00c'; /* Código do Font Awesome para o check mark */
+    font-family: 'Font Awesome 6 Free'; /* Assegura que o ícone seja renderizado */
+    font-weight: 900;
+    color: white;
+    display: block;
+    text-align: center;
+    line-height: 10px; /* Alinha o check verticalmente */
+    font-size: 10px;
+}
