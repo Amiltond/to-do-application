@@ -1,4 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
+    if ("Notification" in window) {
+        Notification.requestPermission().then(permission => {
+            if (permission === "granted") {
+                console.log("Notificações permitidas!");
+            }
+        });
+    }
     const taskInput = document.getElementById('task-input');
     const addTaskBtn = document.getElementById('add-task-btn');
     const taskList =document.getElementById('task-list');
@@ -18,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
     somAdicionar.volume = 0.1;
     const somApagar = new Audio ('./sounds/deletetask.mp3');
     somApagar.volume = 0.1;
-    const somEditar = new Audio ('./sounds/deletetask2.mp3')
+    const somEditar = new Audio ('./sounds/addtask.mp3')
     somEditar.volume = 0.1;
 
     date.addEventListener('input', (e) => {
@@ -157,8 +164,17 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         })
 
-        li.querySelector('.delete-btn').addEventListener('click', () => {
+        // Note que adicionamos o '(e)' aqui para capturar o evento do clique
+        li.querySelector('.delete-btn').addEventListener('click', (e) => {
+            const rect = li.getBoundingClientRect();
 
+            // 1. Calcula a posição exata do clique na tela (0 a 1)
+            const x = (rect.left + (rect.width / 2)) / window.innerWidth;
+            const y = (rect.top + (rect.height / 2)) / window.innerHeight;
+            // 2. Solta a explosão de bolhas nessa posição
+            bubbleBurst(x, y);
+
+            // 3. Toca o som e remove a tarefa (seu código original)
             somApagar.currentTime = 0;
             somApagar.play();
 
@@ -166,7 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
             toggleEmptyState();
             updateProgress();
             saveTaskToLocalStorage();
-        })
+        });
 
         if (checkCompletion) {
             taskList.prepend(li);
@@ -179,7 +195,8 @@ document.addEventListener('DOMContentLoaded', () => {
             date.value = ''; 
 
             somAdicionar.currentTime = 0;
-            somAdicionar.play().catch(e => console.log("Erro no som:", e));
+            somAdicionar.play();
+            lateralBurst(li);
         }
         
         taskInput.style.backgroundColor = '';
@@ -209,6 +226,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // TOCA O SOM DE EDIÇÃO
                 somEditar.currentTime = 0;
                 somEditar.play().catch(e => console.log(e));
+                lateralBurst(currentEditLi);
             }
             
             // Reseta variáveis
@@ -280,8 +298,88 @@ const confettiLaunch = () => {
     confetti({
         particleCount: 60,
         spread: 100,
-        origin: { y: 0.9 },
+        origin: { y: 1.1 },
         colors: ["#219ebc","#52b69a","#d9ed92", "#61a5c2"]
     });
 };
 
+const bubbleBurst = (x, y) => {
+    confetti({
+        particleCount: 10,       // Quantidade de "gotas"
+        spread: 360,             // Explode em todas as direções (círculo)
+        startVelocity: 10,       // Velocidade da explosão
+        ticks: 30,               // Duração curta (some rápido)
+        gravity: 0.1,            // Cai devagar
+        colors: ['#486DD6', '#82c0d5'], // Cores do seu tema (azul/branco)
+        shapes: ['circle'],
+        flat: true,      // Formato de bolinha
+        scalar: 0.7,             // Bolinhas menores
+        disableForReducedMotion: true,
+        origin: { x: x, y: y }   // Onde o mouse clicou
+        
+    });
+};
+
+const lateralBurst = (element) => {
+    // O setTimeout garante que o cálculo acontece DEPOIS que o elemento se acomodou na tela
+    setTimeout(() => {
+        const rect = element.getBoundingClientRect();
+        
+        // Cálculo do centro vertical
+        const y = (rect.top + (rect.height / 2)) / window.innerHeight;
+
+        const commonConfig = {
+            particleCount: 10,
+            spread: 45,           
+            startVelocity: 10,
+            colors: ['#52b69a', '#d9ed92', '#ffffff'],
+            disableForReducedMotion: true,
+            flat: true,
+            scalar: 0.5,
+            ticks: 40,
+            gravity: 0.3
+        };
+
+        // Lado ESQUERDO (tiro para a esquerda ← 180°)
+        confetti({
+            ...commonConfig,
+            angle: 180, 
+            origin: { 
+                x: (rect.left + 20) / window.innerWidth, // +20 para sair de dentro da tarefa
+                y: y 
+            }
+        });
+
+        // Lado DIREITO (tiro para a direita → 0°)
+        confetti({
+            ...commonConfig,
+            angle: 0, 
+            origin: { 
+                x: (rect.right - 20) / window.innerWidth, // -20 para sair de dentro da tarefa
+                y: y 
+            }
+        });
+    }, 50); // Espera 50ms antes de explodir
+};
+
+const sendSystemNotification = (title, body) => {
+    // Verifica se o navegador suporta
+    if (!("Notification" in window)) {
+        return;
+    }
+
+    // Verifica se o usuário deixou
+    if (Notification.permission === "granted") {
+        // Cria a notificação nativa do celular/PC
+        // No celular, o 'icon' aparece na barra de status
+        new Notification(title, {
+            body: body,
+            icon: './image_55db7f.jpg' // O ícone do seu app (usei o da imagem que mandou)
+        });
+        
+        // Tenta vibrar o celular (200ms)
+        if (navigator.vibrate) {
+            navigator.vibrate(200);
+        }
+    }
+};
