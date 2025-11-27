@@ -64,7 +64,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const hasTasks = taskList.children.length > 0;
         statContainer.style.display = hasTasks ? 'flex' : 'none';
         emptyImage.style.display = hasTasks ? 'none' : 'block';
-        todosContainer.style.width = hasTasks ? '100%' : '50%';
+        taskList.style.display = hasTasks ? 'block' : 'none';
+        todosContainer.style.width = '100%'; 
+        
         if (hasTasks) {
             todosContainer.style.justifyContent = 'flex-start';
         } else {

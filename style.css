@@ -149,13 +149,15 @@ body {
 
 .todos-container {
     display: flex;
-    align-items: flex-start;
-    flex-grow: 1;   
-    overflow-y: auto;   
-    min-height: 0;       
+    flex-direction: column; /* Garante alinhamento em coluna */
+    align-items: center;    /* Centraliza horizontalmente (esquerda/direita) */
+    flex-grow: 1;           /* Ocupa todo o espaço vertical disponível */
+    overflow-y: auto;
+    min-height: 0;
     padding: 10px 0;
-    width: 100%;
+    width: 100%;            /* Garante largura total */
 }
+
 #task-list{
     width: 100%;
 }
@@ -412,3 +414,4 @@ body {
     line-height: 10px; /* Alinha o check verticalmente */
     font-size: 8.5px;
 }
+
