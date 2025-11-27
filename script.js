@@ -1,38 +1,64 @@
 document.addEventListener('DOMContentLoaded', () => {
-    if ("Notification" in window) {
-        Notification.requestPermission().then(permission => {
-            if (permission === "granted") {
-                console.log("Notificações permitidas!");
-            }
-        });
-    }
     const taskInput = document.getElementById('task-input');
     const addTaskBtn = document.getElementById('add-task-btn');
-    const taskList =document.getElementById('task-list');
+    const taskList = document.getElementById('task-list');
     const emptyImage = document.querySelector('.empty-image')
     const todosContainer = document.querySelector('.todos-container');
     const progressNumbers = document.getElementById('numbers');
     const progress = document.getElementById('progress');
-    let confettiFired = false;    
+    let confettiFired = false;    
     const date = document.getElementById('data');
     const H3 = document.querySelector("h3");
     const statContainer = document.querySelector('.stat-container');
     let isEditing = false;
     let currentEditLi = null;
-    const somConcluido = new Audio ('./sounds/concluded.mp3')
+    const somConcluido = new Audio('./sounds/concluded.mp3')
     somConcluido.volume = 0.03;
-    const somAdicionar = new Audio ('./sounds/addtask.mp3');
+    const somAdicionar = new Audio('./sounds/addtask.mp3');
     somAdicionar.volume = 0.1;
-    const somApagar = new Audio ('./sounds/deletetask.mp3');
+    const somApagar = new Audio('./sounds/deletetask.mp3');
     somApagar.volume = 0.1;
-    const somEditar = new Audio ('./sounds/addtask.mp3')
+    const somEditar = new Audio('./sounds/addtask.mp3')
     somEditar.volume = 0.1;
 
+    // NOVO CÓDIGO PARA LIMITAR A DATA A DD/MM E VALIDAR LIMITES
     date.addEventListener('input', (e) => {
-        if (e.target.value.length === 2 && e.inputType !== 'deleteContentBackward') {
-            e.target.value += '/';
+        let value = e.target.value.replace(/[^0-9]/g, ''); // 1. Remove tudo que não for dígito
+        
+        // 2. Adiciona a barra "/" automaticamente após o segundo dígito, com validação
+        if (value.length >= 3) {
+            let dia = parseInt(value.substring(0, 2), 10);
+            let mes = parseInt(value.substring(2, 4), 10); 
+            
+            let isValid = true;
+            
+            // Validação básica do Dia e Mês
+            if (dia > 31 || dia === 0) { // Dia não pode ser > 31 ou 00
+                isValid = false;
+            }
+            // Verifica o mês apenas se houver pelo menos 4 dígitos para análise
+            if (value.length >= 4 && (mes > 12 || mes === 0)) { // Mês não pode ser > 12 ou 00
+                isValid = false;
+            }
+
+            if (!isValid) {
+                // Se for inválido (por exemplo, 35 ou 15/13), trunca para os primeiros 2 dígitos
+                // Isso força o usuário a corrigir o dia antes de digitar o mês ou vice-versa.
+                value = value.substring(0, 2);
+            } else {
+                // Se for válido, formata como DD/MM
+                value = value.substring(0, 2) + '/' + value.substring(2);
+            }
         }
+        
+        // 3. Limita o valor final a 5 caracteres (DD/MM)
+        if (value.length > 5) {
+            value = value.substring(0, 5);
+        }
+
+        e.target.value = value;
     });
+    // FIM DO CÓDIGO DE VALIDAÇÃO DE DATA
 
     const toggleEmptyState = () => {
         const hasTasks = taskList.children.length > 0;
@@ -54,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
         '0%';
         progressNumbers.textContent = `${completedTasks} / ${totalTasks}`; 
 
-        const allTasksDone = totalTasks > 0 && totalTasks ===completedTasks;
+        const allTasksDone = totalTasks > 0 && totalTasks === completedTasks;
 
         if(checkCompletion && allTasksDone && !confettiFired) {
             confettiLaunch();
@@ -101,9 +127,27 @@ document.addEventListener('DOMContentLoaded', () => {
         if(!taskText){
             return;
         };
+        
+        // Previne que datas inválidas sejam adicionadas
+        if (taskDate.length > 0) {
+            const dateParts = taskDate.split('/');
+            const dia = parseInt(dateParts[0], 10);
+            const mes = parseInt(dateParts[1], 10);
+            
+            // Validação final antes de adicionar
+            if (dateParts.length !== 2 || dia > 31 || dia === 0 || mes > 12 || mes === 0) {
+                // Opcional: Avisar o usuário que a data é inválida
+                console.error("Data inválida. A tarefa não foi adicionada.");
+                // Opcional: alert("Por favor, insira uma data válida no formato DD/MM (ex: 15/07).");
+                date.focus();
+                date.style.backgroundColor = '#ffc0cb'; // Fundo rosa para erro
+                return;
+            }
+        }
+
 
         const li = document.createElement('li');
-        li.innerHTML =  `
+        li.innerHTML =  `
         <input type="checkbox" class="checkbox" id="checkbox"${completed ? 'checked' : ''} />
         <span>${taskText}</span>
         
@@ -213,9 +257,23 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isEditing) {
             // --- LÓGICA DE EDIÇÃO ---
             if (currentEditLi) {
+                // Validação de data no modo de edição
+                const newDateValue = date.value.trim();
+                const dateParts = newDateValue.split('/');
+                const dia = parseInt(dateParts[0], 10);
+                const mes = parseInt(dateParts[1], 10);
+
+                if (newDateValue.length > 0 && (dateParts.length !== 2 || dia > 31 || dia === 0 || mes > 12 || mes === 0)) {
+                    // Opcional: Avisar o usuário que a data é inválida
+                    console.error("Data inválida. A edição não foi salva.");
+                    date.focus();
+                    date.style.backgroundColor = '#ffc0cb';
+                    return;
+                }
+                
                 // Atualiza os textos
                 currentEditLi.querySelector('span:first-of-type').textContent = taskInput.value.trim();
-                currentEditLi.querySelector('.datedate').textContent = date.value.trim(); 
+                currentEditLi.querySelector('.datedate').textContent = newDateValue; 
                 
                 // Move a tarefa editada para o topo
                 taskList.prepend(currentEditLi);
@@ -247,9 +305,11 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             // --- LÓGICA DE NOVA TAREFA ---
             addTask(null, null, false, true); 
+            // Se a addTask retornar sem adicionar (por data inválida, por exemplo), 
+            // o código abaixo só rodará a limpeza e salvamento se a data for válida.
         }
 
-        // Limpeza final (comum para os dois casos)
+        // Limpeza final (comum para os dois casos se a tarefa foi adicionada/editada)
         taskInput.value = '';
         taskInput.style.backgroundColor = '';
         date.value = ''; 
@@ -305,17 +365,17 @@ const confettiLaunch = () => {
 
 const bubbleBurst = (x, y) => {
     confetti({
-        particleCount: 10,       // Quantidade de "gotas"
-        spread: 360,             // Explode em todas as direções (círculo)
-        startVelocity: 10,       // Velocidade da explosão
-        ticks: 30,               // Duração curta (some rápido)
-        gravity: 0.1,            // Cai devagar
-        colors: ['#486DD6', '#82c0d5'], // Cores do seu tema (azul/branco)
+        particleCount: 10,       
+        spread: 360,             
+        startVelocity: 10,       
+        ticks: 30,               
+        gravity: 0.1,            
+        colors: ['#486DD6', '#82c0d5'], 
         shapes: ['circle'],
-        flat: true,      // Formato de bolinha
-        scalar: 0.7,             // Bolinhas menores
+        flat: true,      
+        scalar: 0.7,             
         disableForReducedMotion: true,
-        origin: { x: x, y: y }   // Onde o mouse clicou
+        origin: { x: x, y: y }   
         
     });
 };
@@ -330,7 +390,7 @@ const lateralBurst = (element) => {
 
         const commonConfig = {
             particleCount: 10,
-            spread: 45,           
+            spread: 45,           
             startVelocity: 10,
             colors: ['#52b69a', '#d9ed92', '#ffffff'],
             disableForReducedMotion: true,
@@ -362,24 +422,3 @@ const lateralBurst = (element) => {
     }, 50); // Espera 50ms antes de explodir
 };
 
-const sendSystemNotification = (title, body) => {
-    // Verifica se o navegador suporta
-    if (!("Notification" in window)) {
-        return;
-    }
-
-    // Verifica se o usuário deixou
-    if (Notification.permission === "granted") {
-        // Cria a notificação nativa do celular/PC
-        // No celular, o 'icon' aparece na barra de status
-        new Notification(title, {
-            body: body,
-            icon: './image_55db7f.jpg' // O ícone do seu app (usei o da imagem que mandou)
-        });
-        
-        // Tenta vibrar o celular (200ms)
-        if (navigator.vibrate) {
-            navigator.vibrate(200);
-        }
-    }
-};
