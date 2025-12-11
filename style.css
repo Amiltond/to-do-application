@@ -131,7 +131,6 @@ body {
 
 .input-area button{
     display: flex;
-    margin-left: 10px;
     align-items: center;
     justify-content: center;
     padding: 8px;
@@ -322,7 +321,7 @@ body {
 
 #add-task-btn {
     width: 60px;
-    height: 120px;
+    height: 110px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -350,7 +349,7 @@ body {
     height: 50px;
     display: flex;
     align-items: center; 
-    margin-top: 10px;
+    
 }
 
 .date-wrapper input {
